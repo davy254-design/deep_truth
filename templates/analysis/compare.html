@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+
+{% block title %}Comparative Analysis - DeepTruth Forensics{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2><i class="bi bi-file-earmark-diff me-2"></i>Comparative Analysis</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="{{ url_for('dashboard.index') }}">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Comparative Analysis</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    {% if not result %}
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0">
+                        <i class="bi bi-upload me-2"></i>
+                        Upload Two Files for Comparison
+                        <span class="badge bg-info ms-2">Images & Videos Supported</span>
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST" action="{{ url_for('analysis.comparative_analysis') }}" enctype="multipart/form-data" id="compareForm">
+                        
+                        <!-- Case Selection -->
+                        <div class="mb-4">
+                            <label for="case_id" class="form-label">Select Case <span class="text-danger">*</span></label>
+                            <select class="form-select" id="case_id" name="case_id" required>
+                                <option value="">-- Select a case --</option>
+                                {% for case in cases %}
+                                <option value="{{ case.id }}">{{ case.case_number }} - {{ case.title[:50] }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <!-- Two upload columns -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">File A (Suspected Original) <span class="text-danger">*</span></label>
+                                <div class="upload-area" id="dropZoneA">
+                                    <i class="bi bi-file-earmark-check" style="font-size:2rem;"></i>
+                                    <h6 class="mt-2">Upload File A</h6>
+                                    <small class="text-muted">Click or drag & drop</small>
+                                </div>
+                                <input type="file" class="d-none" id="media_a" name="media_a" 
+                                       accept=".mp4,.avi,.mov,.mkv,.webm,.jpg,.jpeg,.png,.bmp,.gif,.webp" required>
+                                <div id="previewA" class="mt-2 text-center"></div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label class="form-label">File B (Suspected Manipulated) <span class="text-danger">*</span></label>
+                                <div class="upload-area" id="dropZoneB">
+                                    <i class="bi bi-file-earmark-x" style="font-size:2rem;"></i>
+                                    <h6 class="mt-2">Upload File B</h6>
+                                    <small class="text-muted">Click or drag & drop</small>
+                                </div>
+                                <input type="file" class="d-none" id="media_b" name="media_b" 
+                                       accept=".mp4,.avi,.mov,.mkv,.webm,.jpg,.jpeg,.png,.bmp,.gif,.webp" required>
+                                <div id="previewB" class="mt-2 text-center"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{{ url_for('dashboard.index') }}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-1"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
+                                <i class="bi bi-cpu me-1"></i> Compare Files
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Setup drag and drop for File A
+    setupUpload('dropZoneA', 'media_a', 'previewA');
+    // Setup drag and drop for File B
+    setupUpload('dropZoneB', 'media_b', 'previewB');
+    
+    function setupUpload(dropZoneId, inputId, previewId) {
+        const dropZone = document.getElementById(dropZoneId);
+        const fileInput = document.getElementById(inputId);
+        const preview = document.getElementById(previewId);
+        
+        dropZone.addEventListener('click', function() {
+            fileInput.click();
+        });
+        
+        dropZone.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            dropZone.style.borderColor = '#4cc9f0';
+            dropZone.style.backgroundColor = 'rgba(76, 201, 240, 0.05)';
+        });
+        
+        dropZone.addEventListener('dragleave', function() {
+            dropZone.style.borderColor = '#dee2e6';
+            dropZone.style.backgroundColor = '';
+        });
+        
+        dropZone.addEventListener('drop', function(e) {
+            e.preventDefault();
+            dropZone.style.borderColor = '#dee2e6';
+            dropZone.style.backgroundColor = '';
+            
+            if (e.dataTransfer.files.length > 0) {
+                fileInput.files = e.dataTransfer.files;
+                showPreview(e.dataTransfer.files[0], preview);
+            }
+        });
+        
+        fileInput.addEventListener('change', function() {
+            if (fileInput.files.length > 0) {
+                showPreview(fileInput.files[0], preview);
+            }
+        });
+    }
+    
+    function showPreview(file, previewDiv) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            if (file.type.startsWith('image/')) {
+                previewDiv.innerHTML = `
+                    <div class="text-center">
+                        <img src="${e.target.result}" style="max-width:100%; max-height:150px; border-radius:8px;">
+                        <p class="mt-1 mb-0"><span class="badge bg-success">Image</span></p>
+                        <small class="text-muted">${file.name} (${(file.size/1024).toFixed(1)} KB)</small>
+                    </div>
+                `;
+            } else if (file.type.startsWith('video/')) {
+                previewDiv.innerHTML = `
+                    <div class="text-center">
+                        <video controls style="max-width:100%; max-height:150px; border-radius:8px;">
+                            <source src="${e.target.result}" type="${file.type}">
+                        </video>
+                        <p class="mt-1 mb-0"><span class="badge bg-primary">Video</span></p>
+                        <small class="text-muted">${file.name} (${(file.size/(1024*1024)).toFixed(1)} MB)</small>
+                    </div>
+                `;
+            } else {
+                previewDiv.innerHTML = `
+                    <div class="text-center">
+                        <p class="mt-1 mb-0"><span class="badge bg-secondary">File</span></p>
+                        <small class="text-muted">${file.name} (${(file.size/1024).toFixed(1)} KB)</small>
+                    </div>
+                `;
+            }
+        };
+        reader.readAsDataURL(file);
+    }
+    
+    // Form validation
+    document.getElementById('compareForm').addEventListener('submit', function(e) {
+        const fileA = document.getElementById('media_a').files[0];
+        const fileB = document.getElementById('media_b').files[0];
+        const caseSelect = document.getElementById('case_id').value;
+        
+        if (!fileA) {
+            e.preventDefault();
+            alert('Please select File A.');
+            return;
+        }
+        if (!fileB) {
+            e.preventDefault();
+            alert('Please select File B.');
+            return;
+        }
+        if (!caseSelect) {
+            e.preventDefault();
+            alert('Please select a case.');
+            return;
+        }
+        
+        // Show loading state
+        document.getElementById('submitBtn').disabled = true;
+        document.getElementById('submitBtn').innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Analyzing...';
+    });
+});
+</script>
+{% endblock %}

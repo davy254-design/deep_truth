@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+
+{% block title %}Case {{ case.case_number }} - DeepTruth Forensics{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2><i class="bi bi-folder2-open me-2"></i>{{ case.case_number }}</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="{{ url_for('dashboard.index') }}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('cases.list_cases') }}">Cases</a></li>
+                    <li class="breadcrumb-item active">{{ case.case_number }}</li>
+                </ol>
+            </nav>
+        </div>
+        <div>
+            <a href="{{ url_for('analysis.single_analysis') }}" class="btn btn-primary">
+                <i class="bi bi-plus-circle me-1"></i> Add Evidence
+            </a>
+        </div>
+    </div>
+    
+    <div class="row g-4">
+        <!-- Case Details -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Case Details</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-5">Case Number:</dt>
+                        <dd class="col-sm-7"><span class="badge bg-dark">{{ case.case_number }}</span></dd>
+                        
+                        <dt class="col-sm-5">Title:</dt>
+                        <dd class="col-sm-7">{{ case.title }}</dd>
+                        
+                        <dt class="col-sm-5">Type:</dt>
+                        <dd class="col-sm-7">{{ case.case_type|replace('_', ' ')|title if case.case_type else 'N/A' }}</dd>
+                        
+                        <dt class="col-sm-5">Priority:</dt>
+                        <dd class="col-sm-7">
+                            {% if case.priority == 'critical' %}
+                                <span class="badge bg-danger">Critical</span>
+                            {% elif case.priority == 'high' %}
+                                <span class="badge bg-warning text-dark">High</span>
+                            {% elif case.priority == 'medium' %}
+                                <span class="badge bg-info">Medium</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Low</span>
+                            {% endif %}
+                        </dd>
+                        
+                        <dt class="col-sm-5">Status:</dt>
+                        <dd class="col-sm-7">
+                            {% if case.status == 'open' %}
+                                <span class="badge bg-success">Open</span>
+                            {% elif case.status == 'in_progress' %}
+                                <span class="badge bg-warning text-dark">In Progress</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Closed</span>
+                            {% endif %}
+                        </dd>
+                        
+                        <dt class="col-sm-5">Investigator:</dt>
+                        <dd class="col-sm-7">{{ case.investigator.full_name }}</dd>
+                        
+                        <dt class="col-sm-5">Created:</dt>
+                        <dd class="col-sm-7">{{ case.created_at.strftime('%Y-%m-%d %H:%M') }}</dd>
+                        
+                        {% if case.closed_at %}
+                        <dt class="col-sm-5">Closed:</dt>
+                        <dd class="col-sm-7">{{ case.closed_at.strftime('%Y-%m-%d %H:%M') }}</dd>
+                        {% endif %}
+                    </dl>
+                    
+                    {% if case.description %}
+                    <hr>
+                    <h6>Description:</h6>
+                    <p class="text-muted">{{ case.description }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Update Status -->
+            <div class="card border-0 shadow-sm mt-4">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0"><i class="bi bi-arrow-repeat me-2"></i>Update Status</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('cases.update_case_status', case_id=case.id) }}">
+                        <div class="mb-3">
+                            <select class="form-select" name="status">
+                                <option value="open" {% if case.status == 'open' %}selected{% endif %}>Open</option>
+                                <option value="in_progress" {% if case.status == 'in_progress' %}selected{% endif %}>In Progress</option>
+                                <option value="closed" {% if case.status == 'closed' %}selected{% endif %}>Closed</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <textarea class="form-control" name="notes" rows="2" placeholder="Add notes..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Update Status</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Evidence Files -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-file-earmark-play me-2"></i>Evidence Files</h5>
+                    <span class="badge bg-primary">{{ evidence_files|length }} files</span>
+                </div>
+                <div class="card-body">
+                    {% if evidence_files %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Evidence #</th>
+                                    <th>File Name</th>
+                                    <th>Size</th>
+                                    <th>Status</th>
+                                    <th>Uploaded</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for evidence in evidence_files %}
+                                <tr>
+                                    <td><span class="badge bg-secondary">{{ evidence.evidence_number }}</span></td>
+                                    <td>{{ evidence.original_filename[:30] }}{% if evidence.original_filename|length > 30 %}...{% endif %}</td>
+                                    <td>{{ "%.1f"|format(evidence.file_size / (1024*1024)) if evidence.file_size else 'N/A' }} MB</td>
+                                    <td>
+                                        {% if evidence.status == 'analyzed' %}
+                                            <span class="badge bg-success">Analyzed</span>
+                                        {% elif evidence.status == 'analyzing' %}
+                                            <span class="badge bg-warning text-dark">Analyzing...</span>
+                                        {% elif evidence.status == 'failed' %}
+                                            <span class="badge bg-danger">Failed</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Pending</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ evidence.upload_timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+                                    <td>
+                                        <a href="{{ url_for('analysis.view_result', evidence_id=evidence.id) }}" 
+                                           class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-file-earmark-play" style="font-size: 3rem;"></i>
+                        <p class="mt-2">No evidence files added to this case yet.</p>
+                        <a href="{{ url_for('analysis.single_analysis') }}" class="btn btn-primary">
+                            <i class="bi bi-plus-circle me-1"></i> Add Evidence
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

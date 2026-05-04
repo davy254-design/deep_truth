@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Audit Logs - DeepTruth Forensics{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h2><i class="bi bi-journal-text me-2"></i>System Audit Logs</h2>
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('dashboard.index') }}">Dashboard</a></li>
+            <li class="breadcrumb-item active">Audit Logs</li>
+        </ol>
+    </nav>
+
+    <!-- Filter -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form method="GET" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label">Filter by User</label>
+                    <select class="form-select" name="user_id" onchange="this.form.submit()">
+                        <option value="">All Users</option>
+                        {% for u in users %}
+                        <option value="{{ u.id }}" {% if selected_user == u.id %}selected{% endif %}>
+                            {{ u.full_name }} ({{ u.email }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <a href="{{ url_for('admin.audit_logs') }}" class="btn btn-outline-secondary w-100">Clear Filter</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Logs Table -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>User</th>
+                            <th>Action</th>
+                            <th>Details</th>
+                            <th>IP Address</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in logs.items %}
+                        <tr>
+                            <td><small>{{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</small></td>
+                            <td>
+                                <a href="{{ url_for('admin.user_activity', user_id=log.user_id) }}">
+                                    {{ log.user.full_name if log.user else 'System' }}
+                                </a>
+                            </td>
+                            <td>
+                                <span class="badge 
+                                    {% if 'LOGIN' in log.action %}bg-success
+                                    {% elif 'LOGOUT' in log.action %}bg-secondary
+                                    {% elif 'CREATED' in log.action %}bg-primary
+                                    {% elif 'DELETED' in log.action %}bg-danger
+                                    {% else %}bg-info{% endif %}">
+                                    {{ log.action|replace('_', ' ')|title }}
+                                </span>
+                            </td>
+                            <td><small>{{ log.details }}</small></td>
+                            <td><small class="text-muted">{{ log.ip_address or 'N/A' }}</small></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if logs.pages > 1 %}
+    <nav class="mt-3">
+        <ul class="pagination justify-content-center">
+            {% for p in range(1, logs.pages + 1) %}
+            <li class="page-item {% if p == logs.page %}active{% endif %}">
+                <a class="page-link" href="?page={{ p }}{% if selected_user %}&user_id={{ selected_user }}{% endif %}">{{ p }}</a>
+            </li>
+            {% endfor %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}

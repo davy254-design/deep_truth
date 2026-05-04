@@ -1,0 +1,269 @@
+{% extends "base.html" %}
+
+{% block title %}Comparison Results - DeepTruth Forensics{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2><i class="bi bi-file-earmark-diff me-2"></i>Comparative Analysis Results</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="{{ url_for('dashboard.index') }}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('analysis.comparative_analysis') }}">Comparative Analysis</a></li>
+                    <li class="breadcrumb-item active">Results</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Verdict Banner -->
+    <div class="alert alert-info text-center mb-4">
+        <h4>
+            <i class="bi bi-check-circle me-2"></i>
+            Media {{ result.authentic_video }} is <strong class="text-success">AUTHENTIC</strong>
+            &nbsp;|&nbsp;
+            Media {{ result.manipulated_video }} is <strong class="text-danger">MANIPULATED</strong>
+        </h4>
+        <small>
+            Similarity Index: {{ result.similarity_index }}% 
+            | Model: {{ result.model_name }} v{{ result.model_version }}
+        </small>
+    </div>
+
+    <div class="row g-4 mb-4">
+
+        <!-- Media A -->
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                {% if result.authentic_video == 'A' %}
+                <div class="card-header text-white bg-success">
+                {% else %}
+                <div class="card-header text-white bg-danger">
+                {% endif %}
+                    <h5 class="mb-0">
+                        Media A: {{ result.video_a.file_name[:30] }}
+                        {% if result.authentic_video == 'A' %}
+                        <span class="badge bg-light text-success ms-2">AUTHENTIC</span>
+                        {% else %}
+                        <span class="badge bg-light text-danger ms-2">MANIPULATED</span>
+                        {% endif %}
+                    </h5>
+                </div>
+                <div class="card-body text-center">
+                    {% if result.video_a.authenticity_score > 70 %}
+                    <div class="display-3 fw-bold text-success">
+                    {% elif result.video_a.authenticity_score > 40 %}
+                    <div class="display-3 fw-bold text-warning">
+                    {% else %}
+                    <div class="display-3 fw-bold text-danger">
+                    {% endif %}
+                        {{ "%.1f"|format(result.video_a.authenticity_score) }}%
+                    </div>
+                    <p class="text-muted">Authenticity Score</p>
+                    <p>Confidence: {{ "%.1f"|format(result.video_a.confidence) }}%</p>
+
+                    {% if result.video_a.manipulation_type %}
+                    <span class="badge bg-warning text-dark">
+                        Type: {{ result.video_a.manipulation_type|replace('_', ' ')|title }}
+                    </span>
+                    {% endif %}
+
+                    {% if result.video_a.feature_scores %}
+                    <hr>
+                    <h6 class="text-start mb-3">Feature Analysis:</h6>
+                    {% for feature, score in result.video_a.feature_scores.items() %}
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <small style="width:140px; text-align:left;">
+                            {{ feature|replace('_', ' ')|title }}
+                        </small>
+                        <div class="progress flex-grow-1 mx-2" style="height:8px;">
+                            {% if score > 70 %}
+                            <div class="progress-bar bg-success" style="width:{{ score }}%;"></div>
+                            {% elif score > 40 %}
+                            <div class="progress-bar bg-warning" style="width:{{ score }}%;"></div>
+                            {% else %}
+                            <div class="progress-bar bg-danger" style="width:{{ score }}%;"></div>
+                            {% endif %}
+                        </div>
+                        <small style="width:45px;" class="fw-bold
+                            {% if score > 70 %}text-success
+                            {% elif score > 40 %}text-warning
+                            {% else %}text-danger{% endif %}">
+                            {{ "%.0f"|format(score) }}%
+                        </small>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Media B -->
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                {% if result.authentic_video == 'B' %}
+                <div class="card-header text-white bg-success">
+                {% else %}
+                <div class="card-header text-white bg-danger">
+                {% endif %}
+                    <h5 class="mb-0">
+                        Media B: {{ result.video_b.file_name[:30] }}
+                        {% if result.authentic_video == 'B' %}
+                        <span class="badge bg-light text-success ms-2">AUTHENTIC</span>
+                        {% else %}
+                        <span class="badge bg-light text-danger ms-2">MANIPULATED</span>
+                        {% endif %}
+                    </h5>
+                </div>
+                <div class="card-body text-center">
+                    {% if result.video_b.authenticity_score > 70 %}
+                    <div class="display-3 fw-bold text-success">
+                    {% elif result.video_b.authenticity_score > 40 %}
+                    <div class="display-3 fw-bold text-warning">
+                    {% else %}
+                    <div class="display-3 fw-bold text-danger">
+                    {% endif %}
+                        {{ "%.1f"|format(result.video_b.authenticity_score) }}%
+                    </div>
+                    <p class="text-muted">Authenticity Score</p>
+                    <p>Confidence: {{ "%.1f"|format(result.video_b.confidence) }}%</p>
+
+                    {% if result.video_b.manipulation_type %}
+                    <span class="badge bg-warning text-dark">
+                        Type: {{ result.video_b.manipulation_type|replace('_', ' ')|title }}
+                    </span>
+                    {% endif %}
+
+                    {% if result.video_b.feature_scores %}
+                    <hr>
+                    <h6 class="text-start mb-3">Feature Analysis:</h6>
+                    {% for feature, score in result.video_b.feature_scores.items() %}
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <small style="width:140px; text-align:left;">
+                            {{ feature|replace('_', ' ')|title }}
+                        </small>
+                        <div class="progress flex-grow-1 mx-2" style="height:8px;">
+                            {% if score > 70 %}
+                            <div class="progress-bar bg-success" style="width:{{ score }}%;"></div>
+                            {% elif score > 40 %}
+                            <div class="progress-bar bg-warning" style="width:{{ score }}%;"></div>
+                            {% else %}
+                            <div class="progress-bar bg-danger" style="width:{{ score }}%;"></div>
+                            {% endif %}
+                        </div>
+                        <small style="width:45px;" class="fw-bold
+                            {% if score > 70 %}text-success
+                            {% elif score > 40 %}text-warning
+                            {% else %}text-danger{% endif %}">
+                            {{ "%.0f"|format(score) }}%
+                        </small>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Feature Comparison Table -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white">
+            <h5 class="mb-0"><i class="bi bi-table me-2"></i>Detailed Feature Comparison</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Feature Analyzed</th>
+                            <th class="text-center">Media A Score</th>
+                            <th class="text-center">Media B Score</th>
+                            <th>What This Means</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Noise Pattern Analysis</strong></td>
+                            <td class="text-center fw-bold">
+                                {{ "%.0f"|format(result.video_a.feature_scores.noise_analysis) if result.video_a.feature_scores else 'N/A' }}%
+                            </td>
+                            <td class="text-center fw-bold">
+                                {{ "%.0f"|format(result.video_b.feature_scores.noise_analysis) if result.video_b.feature_scores else 'N/A' }}%
+                            </td>
+                            <td><small>Inconsistent noise patterns often indicate AI-generated or manipulated content. Real media has uniform noise distribution.</small></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Compression Artifacts</strong></td>
+                            <td class="text-center fw-bold">
+                                {{ "%.0f"|format(result.video_a.feature_scores.compression_artifacts) if result.video_a.feature_scores else 'N/A' }}%
+                            </td>
+                            <td class="text-center fw-bold">
+                                {{ "%.0f"|format(result.video_b.feature_scores.compression_artifacts) if result.video_b.feature_scores else 'N/A' }}%
+                            </td>
+                            <td><small>Double compression or unusual artifact patterns suggest re-encoding after manipulation.</small></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Color Consistency</strong></td>
+                            <td class="text-center fw-bold">
+                                {{ "%.0f"|format(result.video_a.feature_scores.color_consistency) if result.video_a.feature_scores else 'N/A' }}%
+                            </td>
+                            <td class="text-center fw-bold">
+                                {{ "%.0f"|format(result.video_b.feature_scores.color_consistency) if result.video_b.feature_scores else 'N/A' }}%
+                            </td>
+                            <td><small>Color temperature and lighting mismatches between facial regions and background indicate face swapping.</small></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Edge/Laplacian Analysis</strong></td>
+                            <td class="text-center fw-bold">
+                                {{ "%.0f"|format(result.video_a.feature_scores.edge_analysis) if result.video_a.feature_scores else 'N/A' }}%
+                            </td>
+                            <td class="text-center fw-bold">
+                                {{ "%.0f"|format(result.video_b.feature_scores.edge_analysis) if result.video_b.feature_scores else 'N/A' }}%
+                            </td>
+                            <td><small>Blurred or inconsistent edges at face boundaries reveal blending artifacts from face swap operations.</small></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Frequency Domain</strong></td>
+                            <td class="text-center fw-bold">
+                                {{ "%.0f"|format(result.video_a.feature_scores.frequency_analysis) if result.video_a.feature_scores else 'N/A' }}%
+                            </td>
+                            <td class="text-center fw-bold">
+                                {{ "%.0f"|format(result.video_b.feature_scores.frequency_analysis) if result.video_b.feature_scores else 'N/A' }}%
+                            </td>
+                            <td><small>GAN-generated content leaves periodic artifacts in the frequency spectrum not found in natural images.</small></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Metadata Consistency</strong></td>
+                            <td class="text-center fw-bold">
+                                {{ "%.0f"|format(result.video_a.feature_scores.metadata_consistency) if result.video_a.feature_scores else 'N/A' }}%
+                            </td>
+                            <td class="text-center fw-bold">
+                                {{ "%.0f"|format(result.video_b.feature_scores.metadata_consistency) if result.video_b.feature_scores else 'N/A' }}%
+                            </td>
+                            <td><small>File metadata that doesn't match content characteristics suggests tampering or synthetic generation.</small></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Hash Integrity</strong></td>
+                            <td class="text-center fw-bold">
+                                {{ "%.0f"|format(result.video_a.feature_scores.hash_integrity) if result.video_a.feature_scores else 'N/A' }}%
+                            </td>
+                            <td class="text-center fw-bold">
+                                {{ "%.0f"|format(result.video_b.feature_scores.hash_integrity) if result.video_b.feature_scores else 'N/A' }}%
+                            </td>
+                            <td><small>Cryptographic hash analysis verifies file structure integrity and detects tampering.</small></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <a href="{{ url_for('analysis.comparative_analysis') }}" class="btn btn-primary">
+            <i class="bi bi-arrow-repeat me-1"></i> Run Another Comparison
+        </a>
+    </div>
+</div>
+{% endblock %}

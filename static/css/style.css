@@ -1,0 +1,214 @@
+/* ===== Sidebar Styles ===== */
+.wrapper {
+    display: flex;
+    width: 100%;
+    min-height: 100vh;
+}
+
+.sidebar {
+    min-width: 280px;
+    max-width: 280px;
+    background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+    color: #fff;
+    transition: all 0.3s;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 999;
+    overflow-y: auto;
+}
+
+.sidebar.active {
+    margin-left: -280px;
+}
+
+.sidebar-header {
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.sidebar-header h4 {
+    color: #4cc9f0;
+    font-weight: 700;
+}
+
+.sidebar-divider {
+    border-color: rgba(255, 255, 255, 0.1);
+    margin: 0;
+}
+
+.sidebar-heading {
+    padding: 10px 20px 5px;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.sidebar ul.components {
+    padding: 0;
+}
+
+.sidebar ul li a {
+    padding: 12px 20px;
+    display: block;
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    transition: all 0.3s;
+    border-left: 3px solid transparent;
+}
+
+.sidebar ul li a:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+    border-left-color: #4cc9f0;
+}
+
+.sidebar ul li.active a {
+    background: rgba(76, 201, 240, 0.1);
+    color: #4cc9f0;
+    border-left-color: #4cc9f0;
+}
+
+.sidebar ul ul a {
+    padding-left: 50px;
+    font-size: 0.9rem;
+}
+
+.sidebar-footer {
+    margin-top: auto;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ===== Content Area ===== */
+#content {
+    width: calc(100% - 280px);
+    margin-left: 280px;
+    transition: all 0.3s;
+    min-height: 100vh;
+    background-color: #f8f9fa;
+}
+
+#content.active {
+    width: 100%;
+    margin-left: 0;
+}
+
+/* ===== Navbar ===== */
+.navbar {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* ===== Stat Cards ===== */
+.stat-card {
+    border-radius: 15px;
+    transition: transform 0.3s;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+.stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+/* ===== Tables ===== */
+.table th {
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.05em;
+}
+
+/* ===== Forms ===== */
+.form-label {
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+/* ===== Upload Area ===== */
+.upload-area {
+    border: 2px dashed #dee2e6;
+    border-radius: 15px;
+    padding: 40px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.upload-area:hover {
+    border-color: #4cc9f0;
+    background: rgba(76, 201, 240, 0.05);
+}
+
+.upload-area i {
+    font-size: 3rem;
+    color: #adb5bd;
+}
+
+/* ===== Results Cards ===== */
+.result-card {
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.result-header {
+    padding: 20px;
+    font-weight: 700;
+}
+
+.result-score {
+    font-size: 3rem;
+    font-weight: 800;
+}
+
+/* ===== Progress ===== */
+.progress {
+    height: 8px;
+    border-radius: 4px;
+}
+
+/* ===== Badges ===== */
+.badge {
+    font-weight: 500;
+}
+
+/* ===== Buttons ===== */
+.btn {
+    border-radius: 8px;
+    font-weight: 500;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #4361ee, #3a0ca3);
+    border: none;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #3a0ca3, #4361ee);
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+    .sidebar {
+        margin-left: -280px;
+    }
+    .sidebar.active {
+        margin-left: 0;
+    }
+    #content {
+        width: 100%;
+        margin-left: 0;
+    }
+    #content.active {
+        margin-left: 280px;
+    }
+}

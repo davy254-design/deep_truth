@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - DeepTruth Forensics{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h2><i class="bi bi-shield-lock me-2"></i>Administrator Dashboard</h2>
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item active">Admin Dashboard</li>
+        </ol>
+    </nav>
+    
+    <!-- System Stats -->
+    <div class="row g-3 mb-4">
+        <div class="col-xl-2 col-md-4 col-6">
+            <div class="card border-0 shadow-sm stat-card bg-primary-subtle">
+                <div class="card-body text-center">
+                    <i class="bi bi-people text-primary" style="font-size:2rem;"></i>
+                    <h3 class="mt-2">{{ stats.total_users }}</h3>
+                    <small class="text-muted">Total Users</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-md-4 col-6">
+            <div class="card border-0 shadow-sm stat-card bg-success-subtle">
+                <div class="card-body text-center">
+                    <i class="bi bi-folder2 text-success" style="font-size:2rem;"></i>
+                    <h3 class="mt-2">{{ stats.total_cases }}</h3>
+                    <small class="text-muted">Total Cases</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-md-4 col-6">
+            <div class="card border-0 shadow-sm stat-card bg-info-subtle">
+                <div class="card-body text-center">
+                    <i class="bi bi-file-earmark text-info" style="font-size:2rem;"></i>
+                    <h3 class="mt-2">{{ stats.total_evidence }}</h3>
+                    <small class="text-muted">Evidence Files</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-md-4 col-6">
+            <div class="card border-0 shadow-sm stat-card bg-warning-subtle">
+                <div class="card-body text-center">
+                    <i class="bi bi-cpu text-warning" style="font-size:2rem;"></i>
+                    <h3 class="mt-2">{{ stats.total_analyses }}</h3>
+                    <small class="text-muted">Analyses</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-md-4 col-6">
+            <div class="card border-0 shadow-sm stat-card bg-danger-subtle">
+                <div class="card-body text-center">
+                    <i class="bi bi-exclamation-triangle text-danger" style="font-size:2rem;"></i>
+                    <h3 class="mt-2">{{ stats.deepfakes_detected }}</h3>
+                    <small class="text-muted">Deepfakes</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-md-4 col-6">
+            <div class="card border-0 shadow-sm stat-card bg-secondary-subtle">
+                <div class="card-body text-center">
+                    <i class="bi bi-file-pdf text-danger" style="font-size:2rem;"></i>
+                    <h3 class="mt-2">{{ stats.total_reports }}</h3>
+                    <small class="text-muted">Reports</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row g-4">
+        <!-- User Management -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bi bi-people me-2"></i>User Management</h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if user_stats %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>User</th>
+                                    <th>Role</th>
+                                    <th>Cases</th>
+                                    <th>Evidence</th>
+                                    <th>Time Active</th>
+                                    <th>Last Login</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for stat in user_stats %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ stat.user.full_name }}</strong>
+                                        <br><small class="text-muted">{{ stat.user.email }}</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge {% if stat.user.role == 'admin' %}bg-danger{% else %}bg-primary{% endif %}">
+                                            {{ stat.user.role|title }}
+                                        </span>
+                                    </td>
+                                    <td>{{ stat.cases_count }}</td>
+                                    <td>{{ stat.evidence_count }}</td>
+                                    <td>{{ stat.time_spent }}</td>
+                                    <td>
+                                        <small>{{ stat.user.last_login.strftime('%Y-%m-%d %H:%M') if stat.user.last_login else 'Never' }}</small>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-center py-4 text-muted">No users found.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Audit Logs -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bi bi-journal-text me-2"></i>System Audit Logs</h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if audit_logs %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Time</th>
+                                    <th>User</th>
+                                    <th>Action</th>
+                                    <th>Details</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for log in audit_logs %}
+                                <tr>
+                                    <td><small>{{ log.timestamp.strftime('%m-%d %H:%M:%S') }}</small></td>
+                                    <td>{{ log.user.full_name if log.user else 'System' }}</td>
+                                    <td>
+                                        <span class="badge {% if log.action == 'LOGIN' %}bg-success{% elif log.action == 'LOGOUT' %}bg-secondary{% elif log.action == 'REGISTER' %}bg-info{% else %}bg-primary{% endif %}">
+                                            {{ log.action }}
+                                        </span>
+                                    </td>
+                                    <td><small>{{ log.details[:50] if log.details else '' }}</small></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-center py-4 text-muted">No audit logs yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Cases -->
+    <div class="card border-0 shadow-sm mt-4">
+        <div class="card-header bg-white">
+            <h5 class="mb-0"><i class="bi bi-folder2 me-2"></i>Recent Cases (All Users)</h5>
+        </div>
+        <div class="card-body p-0">
+            {% if recent_cases %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Case #</th>
+                            <th>Title</th>
+                            <th>Investigator</th>
+                            <th>Status</th>
+                            <th>Created</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for case in recent_cases %}
+                        <tr>
+                            <td><span class="badge bg-dark">{{ case.case_number }}</span></td>
+                            <td>{{ case.title[:40] }}</td>
+                            <td>{{ case.investigator.full_name if case.investigator else 'N/A' }}</td>
+                            <td>
+                                {% if case.status == 'open' %}
+                                <span class="badge bg-success">Open</span>
+                                {% elif case.status == 'in_progress' %}
+                                <span class="badge bg-warning">In Progress</span>
+                                {% else %}
+                                <span class="badge bg-secondary">Closed</span>
+                                {% endif %}
+                            </td>
+                            <td><small>{{ case.created_at.strftime('%Y-%m-%d') }}</small></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

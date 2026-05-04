@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}New Case - DeepTruth Forensics{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2><i class="bi bi-plus-circle me-2"></i>Create New Case</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="{{ url_for('dashboard.index') }}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('cases.list_cases') }}">Cases</a></li>
+                    <li class="breadcrumb-item active">New Case</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0">Case Information</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST" action="{{ url_for('cases.create_case') }}">
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Case Title <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="title" name="title" 
+                                   placeholder="e.g., Suspicious Video Evidence - Case #2026-001" required>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="case_type" class="form-label">Case Type</label>
+                                <select class="form-select" id="case_type" name="case_type">
+                                    <option value="">-- Select Type --</option>
+                                    <option value="misinformation">Misinformation / Disinformation</option>
+                                    <option value="identity_fraud">Identity Fraud</option>
+                                    <option value="cybercrime">Cybercrime</option>
+                                    <option value="legal_evidence">Legal Evidence Verification</option>
+                                    <option value="journalism">Journalism / Media Verification</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="priority" class="form-label">Priority Level</label>
+                                <select class="form-select" id="priority" name="priority">
+                                    <option value="medium">Medium</option>
+                                    <option value="low">Low</option>
+                                    <option value="high">High</option>
+                                    <option value="critical">Critical</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="description" class="form-label">Case Description</label>
+                            <textarea class="form-control" id="description" name="description" rows="5" 
+                                      placeholder="Describe the case details, circumstances, and any relevant information..."></textarea>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('cases.list_cases') }}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-1"></i> Back to Cases
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-lg me-1"></i> Create Case
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

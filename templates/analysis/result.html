@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block title %}Analysis Result - {{ evidence.evidence_number }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2><i class="bi bi-clipboard-data me-2"></i>Analysis Result</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="{{ url_for('dashboard.index') }}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('analysis.single_analysis') }}">Analysis</a></li>
+                    <li class="breadcrumb-item active">{{ evidence.evidence_number }}</li>
+                </ol>
+            </nav>
+        </div>
+        <div>
+            {% if pdf_reports and pdf_reports|length > 0 %}
+            <a href="{{ url_for('analysis.download_report', report_id=pdf_reports[0].id) }}" 
+               class="btn btn-success btn-lg">
+                <i class="bi bi-download me-2"></i> Download PDF Report
+            </a>
+            {% else %}
+            <span class="badge bg-warning p-2">
+                <i class="bi bi-exclamation-triangle me-1"></i> No report generated
+            </span>
+            {% endif %}
+        </div>
+    </div>
+    
+    {% if analysis_result %}
+    <div class="row g-4">
+        <!-- Score Card -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm result-card">
+                <div class="result-header text-center text-white 
+                    {% if analysis_result.classification == 'authentic' %}bg-success
+                    {% elif analysis_result.classification == 'manipulated' %}bg-danger
+                    {% else %}bg-warning{% endif %}">
+                    <h5 class="mb-0">{{ analysis_result.classification|upper }}</h5>
+                </div>
+                <div class="card-body text-center">
+                    <div class="result-score 
+                        {% if analysis_result.classification == 'authentic' %}text-success
+                        {% elif analysis_result.classification == 'manipulated' %}text-danger
+                        {% else %}text-warning{% endif %}">
+                        {{ analysis_result.authenticity_score }}%
+                    </div>
+                    <p class="text-muted">Authenticity Score</p>
+                    <hr>
+                    <dl class="text-start">
+                        <dt>Confidence:</dt>
+                        <dd>{{ analysis_result.confidence }}%</dd>
+                        <dt>Model:</dt>
+                        <dd>{{ analysis_result.model_name }} {{ analysis_result.model_version }}</dd>
+                        {% if analysis_result.manipulation_type %}
+                        <dt>Manipulation:</dt>
+                        <dd>{{ analysis_result.manipulation_type|replace('_', ' ')|title }}</dd>
+                        {% endif %}
+                    </dl>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Details -->
+        <div class="col-lg-8">
+            <!-- Evidence Info -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Evidence Details</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4">Evidence Number:</dt>
+                        <dd class="col-sm-8"><span class="badge bg-dark">{{ evidence.evidence_number }}</span></dd>
+                        <dt class="col-sm-4">File Name:</dt>
+                        <dd class="col-sm-8">{{ evidence.original_filename }}</dd>
+                        <dt class="col-sm-4">File Size:</dt>
+                        <dd class="col-sm-8">{{ "%.2f"|format(evidence.file_size / (1024*1024)) if evidence.file_size else 'N/A' }} MB</dd>
+                        <dt class="col-sm-4">SHA-256 Hash:</dt>
+                        <dd class="col-sm-8"><small class="text-break">{{ evidence.sha256_hash }}</small></dd>
+                    </dl>
+                </div>
+            </div>
+            
+            <!-- Flagged Frames -->
+            {% if analysis_result.flagged_frames %}
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bi bi-flag me-2"></i>Flagged Indicators</h5>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Frame</th>
+                                <th>Timestamp</th>
+                                <th>Indicator</th>
+                                <th>Severity</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for frame in analysis_result.flagged_frames %}
+                            <tr>
+                                <td>#{{ frame.frame_number }}</td>
+                                <td>{{ frame.timestamp_display }}</td>
+                                <td>{{ frame.indicator }}</td>
+                                <td>
+                                    <span class="badge bg-{% if frame.severity == 'critical' %}danger{% elif frame.severity == 'high' %}danger{% elif frame.severity == 'medium' %}warning{% else %}secondary{% endif %}">
+                                        {{ frame.severity|upper }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Chain of Custody -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bi bi-link-45deg me-2"></i>Chain of Custody</h5>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>Action</th>
+                                <th>Performed By</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for entry in custody_entries %}
+                            <tr>
+                                <td>{{ entry.timestamp.strftime('%Y-%m-%d %H:%M:%S') if entry.timestamp else 'N/A' }}</td>
+                                <td><span class="badge bg-info">{{ entry.action|replace('_', ' ')|title }}</span></td>
+                                <td>{{ entry.performer.full_name if entry.performer else 'SYSTEM' }}</td>
+                                <td>{{ entry.description[:80] if entry.description else 'N/A' }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-warning">
+        <i class="bi bi-exclamation-triangle me-1"></i>
+        No analysis results found for this evidence.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
