@@ -18,6 +18,7 @@
     </div>
 
     <!-- Verdict Banner -->
+    {% if result.authentic_video %}
     <div class="alert alert-info text-center mb-4">
         <h4>
             <i class="bi bi-check-circle me-2"></i>
@@ -30,21 +31,59 @@
             | Model: {{ result.model_name }} v{{ result.model_version }}
         </small>
     </div>
+    {% else %}
+    <div class="alert alert-warning text-center mb-4">
+        <h4>
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            <strong>SIMILAR AUTHENTICITY PROFILES</strong>
+        </h4>
+        <p class="mb-2">Both media files have similar authenticity scores (difference: {{ result.similarity_index }}%). Classifications are consistent across both files.</p>
+        <div class="row g-3 mt-3">
+            <div class="col-md-6">
+                <p class="mb-1"><strong>Media A Classification:</strong></p>
+                {% if result.video_a.classification == 'authentic' %}
+                <span class="badge bg-success fs-6">AUTHENTIC</span>
+                {% elif result.video_a.classification == 'suspicious' %}
+                <span class="badge bg-warning text-dark fs-6">SUSPICIOUS</span>
+                {% else %}
+                <span class="badge bg-danger fs-6">MANIPULATED</span>
+                {% endif %}
+            </div>
+            <div class="col-md-6">
+                <p class="mb-1"><strong>Media B Classification:</strong></p>
+                {% if result.video_b.classification == 'authentic' %}
+                <span class="badge bg-success fs-6">AUTHENTIC</span>
+                {% elif result.video_b.classification == 'suspicious' %}
+                <span class="badge bg-warning text-dark fs-6">SUSPICIOUS</span>
+                {% else %}
+                <span class="badge bg-danger fs-6">MANIPULATED</span>
+                {% endif %}
+            </div>
+        </div>
+        <small class="d-block mt-3">
+            Model: {{ result.model_name }} v{{ result.model_version }}
+        </small>
+    </div>
+    {% endif %}
 
     <div class="row g-4 mb-4">
 
         <!-- Media A -->
         <div class="col-md-6">
             <div class="card border-0 shadow-sm h-100">
-                {% if result.authentic_video == 'A' %}
+                {% if result.video_a.classification == 'authentic' %}
                 <div class="card-header text-white bg-success">
+                {% elif result.video_a.classification == 'suspicious' %}
+                <div class="card-header text-white bg-warning">
                 {% else %}
                 <div class="card-header text-white bg-danger">
                 {% endif %}
                     <h5 class="mb-0">
                         Media A: {{ result.video_a.file_name[:30] }}
-                        {% if result.authentic_video == 'A' %}
+                        {% if result.video_a.classification == 'authentic' %}
                         <span class="badge bg-light text-success ms-2">AUTHENTIC</span>
+                        {% elif result.video_a.classification == 'suspicious' %}
+                        <span class="badge bg-light text-warning ms-2">SUSPICIOUS</span>
                         {% else %}
                         <span class="badge bg-light text-danger ms-2">MANIPULATED</span>
                         {% endif %}
@@ -102,15 +141,19 @@
         <!-- Media B -->
         <div class="col-md-6">
             <div class="card border-0 shadow-sm h-100">
-                {% if result.authentic_video == 'B' %}
+                {% if result.video_b.classification == 'authentic' %}
                 <div class="card-header text-white bg-success">
+                {% elif result.video_b.classification == 'suspicious' %}
+                <div class="card-header text-white bg-warning">
                 {% else %}
                 <div class="card-header text-white bg-danger">
                 {% endif %}
                     <h5 class="mb-0">
                         Media B: {{ result.video_b.file_name[:30] }}
-                        {% if result.authentic_video == 'B' %}
+                        {% if result.video_b.classification == 'authentic' %}
                         <span class="badge bg-light text-success ms-2">AUTHENTIC</span>
+                        {% elif result.video_b.classification == 'suspicious' %}
+                        <span class="badge bg-light text-warning ms-2">SUSPICIOUS</span>
                         {% else %}
                         <span class="badge bg-light text-danger ms-2">MANIPULATED</span>
                         {% endif %}
