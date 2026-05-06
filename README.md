@@ -196,8 +196,8 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Authors
 
-- **David Ouma Ochieng** - *Lead Developer* - [davy254-design](https://github.com/davy254-design)
-- **Edwin Ochieng** - *Forensic Specialist*
+- **David Ouma Ochieng** - *Developer/Forensics Specialist* - [davy254-design](https://github.com/davy254-design)
+- **Edwin Ochieng** - *Developer/Forensics Specialist*
 
 ## Acknowledgments
 
