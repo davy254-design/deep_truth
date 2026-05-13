@@ -1,6 +1,6 @@
 # Deep Truth
 
-## Forensic Deepfake Detection Platform
+## AI-Based Deepfake Detection and Automated evidence preservation Platform
 
 Deep Truth is a comprehensive web-based platform designed for forensic analysis and detection of deepfake media. Built with Flask and powered by advanced AI algorithms, it provides investigators with tools to analyze video and image files for deepfake indicators, manage cases, maintain chain of custody, and generate detailed reports.
 
